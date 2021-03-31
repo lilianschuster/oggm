@@ -1733,7 +1733,10 @@ def extend_past_climate_run(past_run_file=None,
     with xr.open_dataset(past_run_file) as past_ds:
 
         # We need at least area and vol to do something
-        if 'volume' not in past_ds.data_vars or 'area' not in past_ds.data_vars:
+        if ('volume' not in past_ds.data_vars or
+                'area' not in past_ds.data_vars) and \
+                ('volume_m3' not in past_ds.data_vars or
+                'area_m2' not in past_ds.data_vars):
             raise InvalidWorkflowError('Need both volume and area to proceed')
 
         y0_run = int(past_ds.time[0])
@@ -1761,7 +1764,10 @@ def extend_past_climate_run(past_run_file=None,
         # Time
         ods['hydro_year'].data[:] = years
         ods['hydro_month'].data[:] = ods['hydro_month'][-1]
-        ods['calendar_year'].data[:] = years - 1
+        if ods['hydro_month'][-1] == 1:
+            ods['calendar_year'].data[:] = years
+        else:
+            ods['calendar_year'].data[:] = years - 1
         ods['calendar_month'].data[:] = ods['calendar_month'][-1]
         for vn in ['hydro_year', 'hydro_month',
                    'calendar_year', 'calendar_month']:
